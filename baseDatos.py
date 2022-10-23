@@ -30,49 +30,45 @@ class baseDatos():
     FUENTE = pd.DataFrame()
     OA_ARTICULO = pd.DataFrame()
     OPEN_ACCESS = pd.DataFrame()
+    #Necesario para poder crear una conexión con el .db
     engine= ''
     md=object
+    #Lee el archivo de Excel donde se encuentra un dataframe con los nombres de los países y sus respectivos códigos
     df_paises=pd.read_excel("bd_paises.xlsx")
    
    
     def __init__(self):
         super().__init__()
 
-    #Ejecución de cada botón almacenado en la interfaz donde se llama la función método para poder leer el archivo, llenar el atributo de clase y seleccionar las columnas deseadas para la realización del código
+    #Ejecución de cada botón almacenado en la interfaz donde se llama la función método para poder leer el archivo, llenar el atributo de clase, seleccionar las columnas deseadas para la realización del código y son renombradas para que puedan ser concatenadads posteriormente
     def ejecutar_wos(self):
-        baseDatos.wos=self.seleccionar_archivo(self, '*.txt')  #retorna un df
+        baseDatos.wos=self.seleccionar_archivo(self, '*.txt')  #retorna un DataFrame
         baseDatos.wos = pd.DataFrame(baseDatos.wos, columns=['TI', 'AU', 'DE', 'ID', 'WC', 'SO', 'AB', 'Z9', 'C3', 'PU', 'C1', 'SN', 'EI', 'BN', 'DI', 'FU', 'OA', 'PY', 'LA', 'WE', 'UT', 'DT'])
-
         baseDatos.wos=baseDatos.wos.rename(columns={'TI' : 'Titulo' , 'AU' : 'Nombre_autor' , 'DE' : 'Autor_keyword' , 'ID' : 'palabras_clave_base_de_datos' , 'WC' : 'categorias' , 'SO' : 'Nombre_fuente' , 'AB' : 'Resumen' , 'Z9' : 'Citas_recibidas' , 'PU' : 'Editorial' , 'C1' : 'paises' , 'SN' : 'ISSN' , 'EI' : 'eISSN' , 'BN' : 'ISBN' , 'DI' : 'DOI' , 'FU' : 'financiamiento' , 'OA' : 'open_access' , 'PY' : 'Anio' , 'LA' : 'Idioma' , 'WE' : 'Base_de_datos' , 'UT' : 'Num_acceso' , 'DT' : 'Tipo_de_documento'})        
-        return baseDatos.wos
     
     def ejecutar_scopus(self):
         baseDatos.scopus
-        baseDatos.scopus=self.seleccionar_archivo(self,'*.csv')  #retorna un df
+        baseDatos.scopus=self.seleccionar_archivo(self,'*.csv')  #retorna un DataFrame
         baseDatos.scopus = pd.DataFrame(baseDatos.scopus, columns=['Title', 'Authors', 'Author Keywords', 'Index Keywords', 'Source title', 'Abstract', 'Cited by', 'Affiliations', 'Publisher', 'ISSN', 'ISBN', 'DOI', 'Funding Details', 'Sponsors', 'Open Access', 'Year', 'Language of Original Document', 'Source', 'EID', 'Document Type'])
-        #columnas=['Titulo' , 'Nombre_autor' , 'Autor_keyword' , 'palabras_clave_base_de_datos' , 'categorias' , 'Nombre_fuente' , 'Resumen' , 'Citas_recibidas' , 'Editorial' , 'paises' , 'ISSN' , 'eISSN' , 'ISBN' , 'DOI' , 'financiamiento' , 'open_access' , 'Anio' , 'Idioma' , 'Base_de_datos' , 'Num_acceso' , 'Tipo_de_documento']
-        #baseDatos.scopus= baseDatos.scopus.reindex(columns = columnas)
+        
+        #Dado de Scopus tiene institución de financiamiento y Sponsor separados, se realiza una unión para que así se pueda recuperar ambas entidades
         aux = pd.DataFrame(baseDatos.scopus, columns=['Funding Details', 'Sponsors'])
         aux=aux.fillna('[No disponible]')
         aux = aux.rename(columns={'Funding Details':'funding'})
-        aux['financiamiento']=aux['funding'].str.cat(aux['Sponsors'], sep='|') #separa financiamiento de sponsor
+        aux['financiamiento']=aux['funding'].str.cat(aux['Sponsors'], sep='|')
         baseDatos.scopus['financiamiento'] = aux['financiamiento']
-        
+
         baseDatos.scopus = pd.DataFrame(baseDatos.scopus, columns=['Title', 'Authors', 'Author Keywords', 'Index Keywords', 'Source title', 'Abstract', 'Cited by', 'Affiliations', 'Publisher', 'ISSN', 'ISBN', 'DOI', 'financiamiento', 'Open Access', 'Year', 'Language of Original Document', 'Source', 'EID', 'Document Type'])
-        
         baseDatos.scopus=baseDatos.scopus.rename(columns={'Title' : 'Titulo' , 'Authors' : 'Nombre_autor' , 'Author Keywords' : 'Autor_keyword' , 'Index Keywords' : 'palabras_clave_base_de_datos' , 'Source title' : 'Nombre_fuente' , 'Abstract' : 'Resumen' , 'Cited by' : 'Citas_recibidas' , 'Publisher' : 'Editorial' , 'Affiliations' : 'paises' , 'ISSN' : 'ISSN' , 'ISBN' : 'ISBN' , 'DOI' : 'DOI' , 'Open Access' : 'open_access' , 'Year' : 'Anio' , 'Language of Original Document' : 'Idioma' , 'Source' : 'Base_de_datos' , 'EID' : 'Num_acceso' , 'Document Type' : 'Tipo_de_documento'})
-        baseDatos.scopus['Nombre_categoria']="[No disponible]"
+        #Scopus no tiene categorias así que se crea una columna con datos "[No disponible]"
         baseDatos.scopus['categorias']="[No disponible]"
         print(baseDatos.scopus)
 
-        return baseDatos.scopus
-
     def ejecutar_scielo(self):
         baseDatos.scielo
-        baseDatos.scielo=self.seleccionar_archivo(self,'*.txt')  #retorna un df
-        
-
+        baseDatos.scielo=self.seleccionar_archivo(self,'*.txt')  #retorna un DataFrame
         baseDatos.scielo = pd.DataFrame(baseDatos.scielo, columns=['TI', 'AU', 'DE', 'EC', 'SC', 'SO', 'AB', 'Z9', 'C1', 'PU', 'SN', 'DI', 'OA', 'PY', 'LA', 'C2', 'UT', 'DT'])
+        #Scielo no tiene categorias así que se crea una columna con datos "[No disponible]"
         baseDatos.scielo['financiamiento'] = '[No disponible]'
         baseDatos.scielo=baseDatos.scielo.rename(columns={'TI' : 'Titulo' , 'AU' : 'Nombre_autor' , 'DE' : 'Autor_keyword' , 'EC' : 'palabras_clave_base_de_datos' , 'SC' : 'categorias' , 'SO' : 'Nombre_fuente' , 'AB' : 'Resumen' , 'Z9' : 'Citas_recibidas' , 'PU' : 'Editorial' , 'C1' : 'paises' , 'SN' : 'ISSN' , 'DI' : 'DOI' , 'OA' : 'open_access' , 'PY' : 'Anio' , 'LA' : 'Idioma' , 'C2' : 'Base_de_datos' , 'UT' : 'Num_acceso' , 'DT' : 'Tipo_de_documento'})
         return baseDatos.scielo
@@ -89,7 +85,7 @@ class baseDatos():
         elif os.path.splitext(archivo)[1] == ".txt":
             df=pd.read_csv(archivo, sep='\t')
         else:
-            messagebox.showinfo('Error', "Por favor seleccione un archivo valido")  #si la extensión no es ninguna de las permitidas se arroja un error     
+            messagebox.showinfo('Error', "Por favor seleccione un archivo valido")  #Si la extensión no es ninguna de las permitidas se arroja un error     
         return df
 
     #Una vez llenados los atributos de clase se procede a concatenar los dataframes principales (wos, scopus, scielo)
@@ -105,20 +101,12 @@ class baseDatos():
     #Limpieza de los datos que se van a incluir en más tablas para así "normalizarlos"
     def limpiar(self):
         baseDatos.completo.reset_index(drop=True, inplace=True) #drop borra inplace reemplaza y así se tienen los ID resueltos
-        baseDatos.completo=baseDatos.completo.fillna({'Citas_recibidas':0.0})
-        baseDatos.completo=baseDatos.completo.fillna('[No disponible]')#llenar los valores vacios con...
-        #filled_df = student_df.fillna({'Age': 17, 'Income(in $)': 300})
-        """ baseDatos.completo['Autor_keyword']=baseDatos.completo['Autor_keyword'].str.upper()
-        baseDatos.completo['Autor_keyword']=baseDatos.completo['Autor_keyword'].str.translate(str.maketrans('áéíóúüñÁÉÍÓÚÜÑ','aeiouunAEIOUUN')) #Pasa los valores de la columna a un str donde se empieza a reemplazar los valores
-        baseDatos.completo['BD_keyword']=baseDatos.completo['BD_keyword'].str.translate(str.maketrans('áéíóúüñÁÉÍÓÚÜÑ','aeiouunAEIOUUN')) #reemplaza, lo pone en la listatranslate(str.maketrans('áéíóúüñÁÉÍÓÚÜÑ','aeiouunAEIOUUN')) #reemplaza, lo pone en la lista
-        baseDatos.completo['BD_keyword']=baseDatos.completo['BD_keyword'].str.upper()
-        baseDatos.completo['Categorias']=baseDatos.completo['Categorias'].str.upper()
-        baseDatos.completo['Categorias']=baseDatos.completo['Categorias'].str.translate(str.maketrans('áéíóúüñÁÉÍÓÚÜÑ','aeiouunAEIOUUN')) 
-        baseDatos.completo['Autores']=baseDatos.completo['Autores'].str.translate(str.maketrans('áéíóúüñÁÉÍÓÚÜÑ','aeiouunAEIOUUN'))  """
+        baseDatos.completo=baseDatos.completo.fillna({'Citas_recibidas':0.0}) #Llenar las filas de citas vacias con 0.0
+        baseDatos.completo=baseDatos.completo.fillna('[No disponible]')#llenar los valores vacios con "[No disponible]"
         self.creacion_tablas(self)
 
 
-    #Método que llama a funciones para la creación de las tablas
+    #Método que llama a funciones para la creación de las tablas y su posterior descarga
     def creacion_tablas(self):
         self.tabla_fuente(self)
         self.tabla_articulo(self)
@@ -134,8 +122,7 @@ class baseDatos():
 #Creación tabla FUENTE
     def tabla_fuente(self):
         baseDatos.FUENTE=pd.DataFrame(baseDatos.completo, columns=['Nombre_fuente', 'ISSN', 'eISSN', 'ISBN'])
-        #baseDatos.FUENTE=baseDatos.FUENTE.drop_duplicates(['ISSN']) #funciona perfectamente,  ahora como pongo el formato ####-#### para que normalice más, no todos tienen issn
-        baseDatos.FUENTE=baseDatos.FUENTE.drop_duplicates(['Nombre_fuente']) #¿Lo incluyo o solo con el ISSN, también lo hago con ISBN?
+        baseDatos.FUENTE=baseDatos.FUENTE.drop_duplicates(['Nombre_fuente'])
         baseDatos.FUENTE = baseDatos.FUENTE.sort_values('Nombre_fuente', axis=0,ascending=True) #ordena alfabéticamente
         baseDatos.FUENTE.reset_index(drop=True, inplace=True) #vuelve a poner indices
         baseDatos.FUENTE=baseDatos.FUENTE.fillna('[No disponible]')
@@ -148,7 +135,7 @@ class baseDatos():
         
         indices=[]
         for j in baseDatos.completo.Nombre_fuente:
-            indices.append([baseDatos.FUENTE.index[baseDatos.FUENTE['Nombre_fuente']==j]][0][0]) #busca dentro de la columna autor de tabla autores la j y pasa el indice a la columna
+            indices.append([baseDatos.FUENTE.index[baseDatos.FUENTE['Nombre_fuente']==j]][0][0]) #busca dentro de la columna Nombre_fuente de tabla FUENTE la j y pasa el indice a la columna
 
         baseDatos.ARTICULO['ID_fuente']=indices #llena la columna de articulo con lo que se hizo en completo
         baseDatos.ARTICULO=baseDatos.ARTICULO.rename_axis('ID_art')
@@ -162,8 +149,8 @@ class baseDatos():
             aux=i.split(", ")
             for j in aux:
                 f=str(j)
-                j=j.upper()
-                if j.find("GREEN")!=-1:
+                j=j.upper() #Se pasa a mayúscula
+                if j.find("GREEN")!=-1: #Incluir todos los green
                     j = "GREEN"
                 tablaoa.append(j)
                 tablaoa_art.append([cont, j])
@@ -177,7 +164,7 @@ class baseDatos():
         indices=[]
         cont=0
         for j in baseDatos.OA_ARTICULO.oa:
-            indices.append([baseDatos.OPEN_ACCESS.index[baseDatos.OPEN_ACCESS['Tipo_oa']==j]][0][0]) #busca dentro de la columna autor de tabla autores la j y pasa el indice a la columna
+            indices.append([baseDatos.OPEN_ACCESS.index[baseDatos.OPEN_ACCESS['Tipo_oa']==j]][0][0])
 
         baseDatos.OA_ARTICULO['ID_oa']=indices
         baseDatos.OA_ARTICULO=pd.DataFrame(baseDatos.OA_ARTICULO, columns=['ID_art', 'ID_oa'])
@@ -194,7 +181,7 @@ class baseDatos():
         for i in auKey:
             aux=i.split("; ")
             for j in aux:
-                j = re.sub(r'[^\w\s]','',j)
+                j = re.sub(r'[^\w\s]','',j) #Elimina , y caracteres especiales
                 tabAuKey.append([cont, j])
             cont=cont+1
         baseDatos.AUKEY_ARTICULO = pd.DataFrame(tabAuKey)
@@ -226,17 +213,16 @@ class baseDatos():
             else:
                 aux=i.split(", ")
             for j in aux:
-                j=re.sub(r'[^\w\s]','',j) #quita , y caracteres especiales
+                j=re.sub(r'[^\w\s]','',j) #Elimina , y caracteres especiales
                 tabAut.append([cont, j])
             cont=cont+1
 
         baseDatos.AUTOR_ARTICULO=pd.DataFrame(tabAut)
-        baseDatos.AUTOR_ARTICULO=baseDatos.AUTOR_ARTICULO.rename(columns={0:'ID_art', 1:'Nombre_autor'}) #cambia nombres
+        baseDatos.AUTOR_ARTICULO=baseDatos.AUTOR_ARTICULO.rename(columns={0:'ID_art', 1:'Nombre_autor'}) #Cambia nombres para poder pasar al modelo después
         
-
-        baseDatos.AUTOR = pd.DataFrame(list(OrderedDict.fromkeys(baseDatos.AUTOR_ARTICULO.Nombre_autor.tolist()))) #quita duplicados los pasa a una linea y los mete dentro del df
+        baseDatos.AUTOR = pd.DataFrame(list(OrderedDict.fromkeys(baseDatos.AUTOR_ARTICULO.Nombre_autor.tolist()))) #Elimina duplicados los pasa a una linea y los mete dentro del DataFrame
         baseDatos.AUTOR = baseDatos.AUTOR.sort_values(0,ascending=True) #ordena alfabéticamente
-        baseDatos.AUTOR = baseDatos.AUTOR.rename(columns={0:'Nombre_autor'}) #cambia nombre de lo ingresado en el 105
+        baseDatos.AUTOR = baseDatos.AUTOR.rename(columns={0:'Nombre_autor'})
         baseDatos.AUTOR.reset_index(drop=True, inplace=True) #vuelve a poner indices
         baseDatos.AUTOR = baseDatos.AUTOR.rename_axis('ID_au')
 
@@ -326,9 +312,10 @@ class baseDatos():
         baseDatos.BDKEY_ARTICULO=pd.DataFrame(baseDatos.BDKEY_ARTICULO, columns={'ID_art', 'ID_bdKey'})
         baseDatos.BDKEY_ARTICULO= baseDatos.BDKEY_ARTICULO.rename_axis('ID_bdKey_art')
 
+#Método para buscar un país dentro de la base de datos de Excel de paises, retorna = "Código; Nombre_pais"
     def busca_pais(self, texto:str):
-        for index, fila in baseDatos.df_paises.iterrows():
-            if texto.find(str(fila['Country'])) != -1:
+        for index, fila in baseDatos.df_paises.iterrows(): #Recorre el DataFrame
+            if texto.find(str(fila['Country'])) != -1: #Busca en país
                 return str(fila['Code'])+"; "+ str(fila['Country'])
             elif texto.find(str(fila['Esp'])) != -1:
                 return str(fila['Code'])+"; "+ str(fila['Country'])
