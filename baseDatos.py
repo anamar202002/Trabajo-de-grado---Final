@@ -89,7 +89,7 @@ class baseDatos():
         return df
 
     #Una vez llenados los atributos de clase se procede a concatenar los dataframes principales (wos, scopus, scielo)
-    #se ejecuta este comando con el botón "aceptar" de la interfaz
+    #se ejecuta este comando con el botón "Continuar" de la interfaz
     
     def concatenar (self):
         baseDatos.completo
@@ -353,20 +353,20 @@ class baseDatos():
                 ins=j.split(", ")
 
                 if cont < len(baseDatos.wos.index)+len(baseDatos.scielo.index): #Si está entre wos o scielo
-                    #separa las instituciones por , donde esta la institución, sigue el pais (ins)
-                    pais=self.busca_pais(self, str(ins[-1]))
+                    #separa las cadenas por , donde esta la institución
+                    pais=self.busca_pais(self, str(ins[-1])) #El país se encuentra en la última posición
                     #lograr que si solo hay un registro entonces omita el pais
                     if len(ins)==1:
-                        tabla_art_ins.append([cont, ins[0].strip(), '[No disponible]'])#strip elimina los espacios en blanco a los extremos de la cadena
+                        tabla_art_ins.append([cont, ins[0].strip(), '[No disponible]']) #Strip elimina los espacios al inicio y al final de cada cadena
                     else:
-                        tabla_art_ins.append([cont, ins[0].strip(), pais])#strip elimina los espacios en blanco a los extremos de la cadena
-                else: #Si está en Scopus
+                        tabla_art_ins.append([cont, ins[0].strip(), pais])
+                else: #Está en Scopus
                     pais=self.busca_pais(self, str(ins[-1]))
                     aux1=len(tabla_art_ins)
                     for k in ins:
                         k=str(k)
-                        if k.find('Univ')!=-1:
-                            tabla_art_ins.append([cont, ins[ins.index(k)], pais])
+                        if k.find('Univ')!=-1: #Si encuentra cualquiera de estas subcadenas dentro del texto entonces que la incluya
+                            tabla_art_ins.append([cont, ins[ins.index(k)], pais]) #Añade a k
                             i_aux.append(ins[ins.index(k)])
                             break
                         elif k.find('Instit')!=-1:
@@ -389,16 +389,9 @@ class baseDatos():
                             tabla_art_ins.append([cont, ins[ins.index(k)], pais])
                             i_aux.append(ins[ins.index(k)])
                             break
-                    if len(tabla_art_ins) == aux1:#Si sigue igual es porque no añadió nada
+                    if len(tabla_art_ins) == aux1:#Si el tamaño sigue igual es porque no añadió nada
                         tabla_art_ins.append([cont, ins[0], pais])
             cont=cont+1
-
-        for m in range(len(tabla_art_ins)):
-            a=tabla_art_ins[m][2] in i_aux
-            if a == True:
-                tabla_art_ins[m][2]="[No disponible]"
-
-              
 
         baseDatos.INSTITUCION_ARTICULO=pd.DataFrame(tabla_art_ins)
         baseDatos.INSTITUCION_ARTICULO=baseDatos.INSTITUCION_ARTICULO.rename(columns={0:'ID_art', 1:'Nombre_institucion', 2 : 'pais'})
@@ -410,7 +403,7 @@ class baseDatos():
         paises=[]
         for pais in baseDatos.INSTITUCION_ARTICULO.pais:
             pais=str(pais)
-            aux=pais.split("; ")
+            aux=pais.split("; ") #Antes se unió el codigo con el país mediante un ;, ahora se dividen
             codigos.append(aux[0])
             paises.append(aux[-1])
         
@@ -439,7 +432,6 @@ class baseDatos():
         baseDatos.INSTITUCION_ARTICULO=pd.DataFrame(baseDatos.INSTITUCION_ARTICULO, columns={'ID_art', 'ID_institucion'})
         baseDatos.PAIS=pd.DataFrame(baseDatos.PAIS, columns={'Codigo', 'Nombre_pais'})
         
-        return
     #Creación tablas financiamiento
     def tablas_financiamiento(self):
         fin=baseDatos.completo.financiamiento.tolist()
@@ -462,8 +454,9 @@ class baseDatos():
                             i=i.replace(i[ini]+aux+i[fin], '')
                             
                             aux=''
-                        if i.find('(')!=-1:
+                        if i.find('(')!=-1 and i.find(')')!=-1:
                             ini=i.index('(')
+
                             fin=i.index(')')
                             for l in range(ini+1, fin):
                                 aux+=i[l]
@@ -472,11 +465,11 @@ class baseDatos():
                             aux=''
                         finan.append([cont, i, num,  acro])
                 if cont>len(baseDatos.wos.index)+len(baseDatos.scielo.index):
+                    #Se está omitiendo a Scielo dado que no tiene datos sobre los patrocinadores
                     sponsor=j.split('|') #es porque está en scopus y separa instituciones|sponsor
 
                     for i in range(len(sponsor)):
                         if i == 0:
-                            #if sponsor[i].find("; "): f=sponsor[i].split('; ')
                             f=sponsor[i]
                             f = f.replace(u'\xa0', u' ')
                             f=f.split('; ') #bien
@@ -491,8 +484,8 @@ class baseDatos():
                                 n=aux[0]
 
                                 if n.find(", ")==-1: #si no hay , entonces solo hay un registro
-                                    if re.compile("[A-Z]+").fullmatch(n) or re.compile("[A-Z0-9-/_‐. ]+").fullmatch(n): #la primera es para encontrar acronimos la segunda numeros, no cuenta cuando elnumero tiene minusculas. Esto lo q ue hace es descartarlas.
-                                        continue
+                                    if re.compile("[A-Z]+").fullmatch(n) or re.compile("[A-Z0-9-/_‐. ]+").fullmatch(n): #la primera es para encontrar acronimos la segunda numeros, no cuenta cuando elnumero tiene minusculas.
+                                        continue #Esto lo que hace es descartarlas.
                                     else:         
                                         finan.append([cont,n,"[No disponible]", "[No disponible]"]) #mete la insitución y rellena con...
                                 else: #si tiene comas entonces
@@ -507,21 +500,12 @@ class baseDatos():
                                         elif ins_a[0]==k: #el nombre de la institucion de financiamiento está en la primera posición
                                             name=k
                                     if name!="[No disponible]": finan.append([cont,name, num, acro])
-                            
-                    """ f=sponsor[1].split(';') #falta la parte del sponsor.
-                    f=str(f)
-                    for 
-                    if f.find("(")!=-1:
-                        print("hay parentesis")
-                    else """
-
+ 
             else: 
                 finan.append([cont, '[No disponible]', '[No disponible]', '[No disponible]'])
             cont+=1
-        #df=df.isin([0, 2]).drop() posible forma de eliminar
         baseDatos.FINANCIAMIENTO_ARTICULO = pd.DataFrame(finan)
         baseDatos.FINANCIAMIENTO_ARTICULO =  baseDatos.FINANCIAMIENTO_ARTICULO.rename(columns={0:'ID_art', 1:'Institucion', 2:'Numero', 3:'Acronimo'})
-        print(baseDatos.FINANCIAMIENTO_ARTICULO)
         baseDatos.FINANCIAMIENTO = pd.DataFrame(finan)
         baseDatos.FINANCIAMIENTO =  baseDatos.FINANCIAMIENTO.rename(columns={0:'ID_art', 1:'Institucion', 2:'Numero', 3:'Acronimo'})
         baseDatos.FINANCIAMIENTO = baseDatos.FINANCIAMIENTO.sort_values('Institucion',0,ascending=True)
@@ -539,13 +523,12 @@ class baseDatos():
 
 
 
-    #Creación de la base de datos
+    #Creación de la base de datos, passa cada DataFrame a una tabla sql del modelo de datos
     def descargas(self):
-        import Modelo as md
-        baseDatos.md=md
+        import Modelo
+        baseDatos.md=Modelo 
                
-        baseDatos.engine = create_engine(md.archivo)
-        
+        baseDatos.engine = create_engine(Modelo.archivo)
 
         baseDatos.ARTICULO.to_sql("ARTICULO", con=baseDatos.engine, if_exists="append")
         baseDatos.BDKEY_ARTICULO.to_sql("BDKEY_ARTICULO", con=baseDatos.engine, if_exists="append")

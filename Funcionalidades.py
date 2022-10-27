@@ -8,89 +8,6 @@ import numpy as np
 from wordcloud import WordCloud, STOPWORDS
 import matplotlib.pyplot as plt
 from baseDatos import baseDatos
-#plotly y panel permite exportar a html
-
-class graficos():
-    def __init__(self):
-        pass
-    
-    def treemap(self, valores: list, leyenda: list, nombre_graf: str):
-        for i in range(len(valores)):
-            leyenda[i]=leyenda[i]+" ("+str(valores[i])+")"
-        df=pd.DataFrame(dict(leyenda=leyenda, valores=valores))
-        fig=px.treemap(df, path=[px.Constant("all"),'leyenda'], values='valores')
-        fig.update_traces(root_color='lightgrey')
-        fig.update_layout(margin = dict(t=0, l=0, r=0, b=0))#las margenes en 0 evita los espacios en blanco fuera del grafico
-        fig.write_image(nombre_graf+".jpg")
-        fig.write_html(nombre_graf+".html")
-        #fig.show() #treemap plotly
-
-    def barchart(self, valores:list, leyenda:list, nombre_graf:str):
-        df=pd.DataFrame(dict(leyenda=leyenda, valores=valores))
-        fig = px.bar(df, y='valores', x='leyenda', text='leyenda')
-        fig.update_layout(showlegend=False)
-        fig.write_image(nombre_graf+".jpg")
-        fig.write_html(nombre_graf+".html")
-        #fig.show()
-    
-    def lotka(self, trabajos:list, autores:list):
-
-        fig = go.Figure(
-            data = [
-                go.Scatter(x=trabajos, y=autores, name="Autores"),
-                go.Scatter(x=trabajos, y=trabajos, name="Trabajos"),
-            ],
-            layout = {"xaxis": {"title": "Trabajos"}, "yaxis": {"title": "Autores"}, "title": "Lotka"}
-        )
-        fig.write_image("Lotka.jpg")
-        fig.write_html("Lotka.html")
-
-    def nubes_palabras(self, df, columna, nombre_graf):
-        t=[]
-        text = " ".join(review for review in df[columna].astype(str))
-
-        stopwords = set(STOPWORDS)
-        stopwords.update(["x", "y", "your", "yours", "yourself", "yourselves", "you", "yond", "yonder", "yon", "ye", "yet", "z", "zillion", "j", "u", "umpteen", "usually", "us", "username", "uponed", "upons", "uponing", "upon", "ups", "upping", "upped", "up", "unto", "until", "unless", "unlike", "unliker", "unlikest", "under", "underneath", "use", "used", "usedest", "r", "rath", "rather", "rathest", "rathe", "re", "relate", "related", "relatively", "regarding", "really", "res", "respecting", "respectively", "q", "quite", "que", "qua", "n", "neither", "neaths", "neath", "nethe", "nethermost", "necessary", "necessariest", "necessarier", "never", "nevertheless", "nigh", "nighest", "nigher", "nine", "noone", "nobody", "nobodies", "nowhere", "nowheres", "no", "noes", "nor", "nos", "no-one", "none", "not", "notwithstanding", "nothings", "nothing", "nathless", "natheless", "t", "ten", "tills", "till", "tilled", "tilling", "to", "towards", "toward", "towardest", "towarder", "together", "too", "thy", "thyself", "thus", "than", "that", "those", "thou", "though", "thous", "thouses", "thoroughest", "thorougher", "thorough", "thoroughly", "thru", "thruer", "thruest", "thro", "through", "throughout", "throughest", "througher", "thine", "this", "thises", "they", "thee", "the", "then", "thence", "thenest", "thener", "them", "themselves", "these", "therer", "there", "thereby", "therest", "thereafter", "therein", "thereupon", "therefore", "their", "theirs", "thing", "things", "three", "two", "o", "oh", "owt", "owning", "owned", "own", "owns", "others", "other", "otherwise", "otherwisest", "otherwiser", "of", "often", "oftener", "oftenest", "off", "offs", "offest", "one", "ought", "oughts", "our", "ours", "ourselves", "ourself", "out", "outest", "outed", "outwith", "outs", "outside", "over", "overallest", "overaller", "overalls", "overall", "overs", "or", "orer", "orest", "on", "oneself", "onest", "ons", "onto", "a", "atween", "at", "athwart", "atop", "afore", "afterward", "afterwards", "after", "afterest", "afterer", "ain", "an", "any", "anything", "anybody", "anyone", "anyhow", "anywhere", "anent", "anear", "and", "andor", "another", "around", "ares", "are", "aest", "aer", "against", "again", "accordingly", "abaft", "abafter", "abaftest", "abovest", "above", "abover", "abouter", "aboutest", "about", "aid", "amidst", "amid", "among", "amongst", "apartest", "aparter", "apart", "appeared", "appears", "appear", "appearing", "appropriating", "appropriate", "appropriatest", "appropriates", "appropriater", "appropriated", "already", "always", "also", "along", "alongside", "although", "almost", "all", "allest", "aller", "allyou", "alls", "albeit", "awfully", "as", "aside", "asides", "aslant", "ases", "astrider", "astride", "astridest", "astraddlest", "astraddler", "astraddle", "availablest", "availabler", "available", "aughts", "aught", "vs", "v", "variousest", "variouser", "various", "via", "vis-a-vis", "vis-a-viser", "vis-a-visest", "viz", "very", "veriest", "verier", "versus", "k", "g", "go", "gone", "good", "got", "gotta", "gotten", "get", "gets", "getting", "b", "by", "byandby", "by-and-by", "bist", "both", "but", "buts", "be", "beyond", "because", "became", "becomes", "become", "becoming", "becomings", "becominger", "becomingest", "behind", "behinds", "before", "beforehand", "beforehandest", "beforehander", "bettered", "betters", "better", "bettering", "betwixt", "between", "beneath", "been", "below", "besides", "beside", "m", "my", "myself", "mucher", "muchest", "much", "must", "musts", "musths", "musth", "main", "make", "mayest", "many", "mauger", "maugre", "me", "meanwhiles", "meanwhile", "mostly", "most", "moreover", "more", "might", "mights", "midst", "midsts", "h", "huh", "humph", "he", "hers", "herself", "her", "hereby", "herein", "hereafters", "hereafter", "hereupon", "hence", "hadst", "had", "having", "haves", "have", "has", "hast", "hardly", "hae", "hath", "him", "himself", "hither", "hitherest", "hitherer", "his", "how-do-you-do", "however", "how", "howbeit", "howdoyoudo", "hoos", "hoo", "w", "woulded", "woulding", "would", "woulds", "was", "wast", "we", "wert", "were", "with", "withal", "without", "within", "why", "what", "whatever", "whateverer", "whateverest", "whatsoeverer", "whatsoeverest", "whatsoever", "whence", "whencesoever", "whenever", "whensoever", "when", "whenas", "whether", "wheen", "whereto", "whereupon", "wherever", "whereon", "whereof", "where", "whereby", "wherewithal", "wherewith", "whereinto", "wherein", "whereafter", "whereas", "wheresoever", "wherefrom", "which", "whichever", "whichsoever", "whilst", "while", "whiles", "whithersoever", "whither", "whoever", "whosoever", "whoso", "whose", "whomever", "s", "syne", "syn", "shalling", "shall", "shalled", "shalls", "shoulding", "should", "shoulded", "shoulds", "she", "sayyid", "sayid", "said", "saider", "saidest", "same", "samest", "sames", "samer", "saved", "sans", "sanses", "sanserifs", "sanserif", "so", "soer", "soest", "sobeit", "someone", "somebody", "somehow", "some", "somewhere", "somewhat", "something", "sometimest", "sometimes", "sometimer", "sometime", "several", "severaler", "severalest", "serious", "seriousest", "seriouser", "senza", "send", "sent", "seem", "seems", "seemed", "seemingest", "seeminger", "seemings", "seven", "summat", "sups", "sup", "supping", "supped", "such", "since", "sine", "sines", "sith", "six", "stop", "stopped", "p", "plaintiff", "plenty", "plenties", "please", "pleased", "pleases", "per", "perhaps", "particulars", "particularly", "particular", "particularest", "particularer", "pro", "providing", "provides", "provided", "provide", "probably", "l", "layabout", "layabouts", "latter", "latterest", "latterer", "latterly", "latters", "lots", "lotting", "lotted", "lot", "lest", "less", "ie", "ifs", "if", "i", "info", "information", "itself", "its", "it", "is", "idem", "idemer", "idemest", "immediate", "immediately", "immediatest", "immediater", "in", "inwards", "inwardest", "inwarder", "inward", "inasmuch", "into", "instead", "insofar", "indicates", "indicated", "indicate", "indicating", "indeed", "inc", "f", "fact", "facts", "fs", "figupon", "figupons", "figuponing", "figuponed", "few", "fewer", "fewest", "frae", "from", "failing", "failings", "five", "furthers", "furtherer", "furthered", "furtherest", "further", "furthering", "furthermore", "fourscore", "followthrough", "for", "forwhy", "fornenst", "formerly", "former", "formerer", "formerest", "formers", "forbye", "forby", "fore", "forever", "forer", "fores", "four", "d", "ddays", "dday", "do", "doing", "doings", "doe", "does", "doth", "downwarder", "downwardest", "downward", "downwards", "downs", "done", "doner", "dones", "donest", "dos", "dost", "did", "differentest", "differenter", "different", "describing", "describe", "describes", "described", "despiting", "despites", "despited", "despite", "during", "c", "cum", "circa", "chez", "cer", "certain", "certainest", "certainer", "cest", "canst", "cannot", "cant", "cants", "canting", "cantest", "canted", "co", "could", "couldst", "comeon", "comeons", "come-ons", "come-on", "concerning", "concerninger", "concerningest", "consequently", "considering", "e", "eg", "eight", "either", "even", "evens", "evenser", "evensest", "evened", "evenest", "ever", "everyone", "everything", "everybody", "everywhere", "every", "ere", "each", "et", "etc", "elsewhere", "else", "ex", "excepted", "excepts", "except", "excepting", "exes", "enough", "qué","porque","posible","primer","primera","primero","primeros","principalmente","pronto","propia","propias","propio","propios","proximo","próximo","próximos","pudo","pueda","puede","pueden","puedo","pues","q","qeu","que","quedó","queremos","quien","quienes","quiere","quiza","quizas","quizá","quizás","quién","quiénes","qué","r","raras","realizado","realizar","realizó","repente","respecto","s","sabe","sabeis","sabemos","saben","saber","sabes","sal","salvo","se","sea","seamos","sean","seas","segun","segunda","segundo","según","seis","ser","sera","seremos","será","serán","serás","seré","seréis","sería","seríais","seríamos","serían","serías","seáis","señaló","si","sido","siempre","siendo","siete","sigue","siguiente","sin","sino","sobre","sois","sola","solamente","solas","solo","solos","somos","son","soy","soyos","su","supuesto","sus","suya","suyas","suyo","suyos","sé","sí","sólo","t","tal","tambien","también","tampoco","tan","tanto","tarde","te","temprano","tendremos","tendrá","tendrán","tendrás","tendré","tendréis","tendría","tendríais","tendríamos","tendrían","tendrías","tened","teneis","tenemos","tener","tenga","tengamos","tengan","tengas","tengo","tengáis","tenida","tenidas","tenido","tenidos","teniendo","tenéis","tenía","teníais","teníamos","tenían","tenías","tercera","ti","tiempo","tiene","tienen","tienes","toda","todas","todavia","todavía","todo","todos","total","trabaja","trabajais","trabajamos","trabajan","trabajar","trabajas","trabajo","tras","trata","través","tres","tu","tus","tuve","tuviera","tuvierais","tuvieran","tuvieras","tuvieron","tuviese","tuvieseis","tuviesen","tuvieses","tuvimos","tuviste","tuvisteis","tuviéramos","tuviésemos","tuvo","tuya","tuyas","tuyo","tuyos","tú","u","ultimo","un","una","unas","uno","unos","usa","usais","usamos","usan","usar","usas","uso","usted","ustedes","v","va","vais","valor","vamos","van","varias","varios","vaya","veces","ver","verdad","verdadera","verdadero","vez","vosotras","vosotros","voy","vuestra","vuestras","vuestro","vuestros","w","x","y","ya","yo","z","él","éramos","ésa","ésas","ése","ésos","ésta","éstas","éste","éstos","última","últimas","último","últimos"])
-
-        wordcloud = WordCloud(stopwords=stopwords, background_color="white", width=1344, height=743).generate(text)
-        t.append([palabra for palabra in text.split(' ') if palabra not in stopwords])
-        df=pd.DataFrame(t)
-        df=df.T
-        df=df.rename(columns={0:'Palabra'})
-        df =  df.groupby('Palabra').size().reset_index(name='Repeticiones')
-        df = df.sort_values(by='Repeticiones', ascending=False) #ordena las repeticiones de mayor a menor
-
-        plt.axis("off")
-        plt.figure( figsize=(40,20))
-        plt.tight_layout(pad=0)
-        plt.imshow(wordcloud, interpolation='bilinear')
-        plt.axis('off')
-        plt.savefig(nombre_graf+".png", bbox_inches='tight',pad_inches = 0)
-
-        return df
-    
-    def lineas(self, valores:list, leyenda:list, nombre_graf:str):
-        df=pd.DataFrame(dict(leyenda=leyenda, valores=valores))
-        fig = px.line(df, x=leyenda, y=valores, title=nombre_graf)
-        fig.update_layout(showlegend=False)
-        fig.write_image(nombre_graf+".jpg")
-        fig.write_html(nombre_graf+".html")
-
-
-    def pie(self, valores:list, leyenda:list, nombre_graf:str):
-        # This dataframe has 244 lines, but 4 distinct values for `day`
-        df=pd.DataFrame(dict(leyenda=leyenda, valores=valores))
-        fig = px.pie(df, values=valores, names=leyenda)
-        fig.write_image(nombre_graf+".jpg")
-        fig.write_html(nombre_graf+".html")
-
-    def mapa_paises(self, df:pd.DataFrame):
-        fig = px.choropleth(df, locations="Codigo",
-                            color="Cantidad_articulos", # lifeExp is a column of gapminder
-                            hover_name="Nombre_pais", # column to add to hover information
-                            color_continuous_scale=px.colors.sequential.Plasma)
-        fig.write_image("mapa.jpg")
-        fig.write_html("mapa.html")
 
 
 class autores(): #Se realiza la consulta de los autores más citados y los autores con mayor cantidad de artículos escritos
@@ -132,6 +49,15 @@ class autores(): #Se realiza la consulta de los autores más citados y los autor
         autores.df_au_elite=autores.df_au_elite.sort_values(by="Cantidad_articulos", ascending=True)
         autores.df_au_elite=autores.df_au_elite.reset_index(drop=True)
         print(autores.df_au_elite)
+    
+    def calculo_lotka(self, n:int):
+        aux=autores.df_lotka.where(autores.df_lotka.Cantidad_articulos==1)
+        aux=aux.dropna()
+        a=aux['Cantidad_autores'][0]
+        a=int(a)
+        v=a/pow(n, 2)
+        return "Para "+str(n)+" documentos segun Lotka existirán "+str(v)+" autores."
+
 
     def filtro(self, autor):
         nConsulta=autores.codConsulta+" AND "+autores.nombre+" = "+'"'+autor+'"'
@@ -315,9 +241,10 @@ class general():
     df_tipo_doc=df_tipo_doc_art.groupby('Tipo_de_documento').size().reset_index(name='Cantidad_articulos')
 
     def oa(self):
-        cons="SELECT OPEN_ACCESS.Tipo_oa, ARTICULO.Titulo from OPEN_ACCESS, OA_ARTICULO, ARTICULO WHERE OA_ARTICULO.ID_oa = OPEN_ACCESS.ID_oa AND ARTICULO.ID_art = OA_ARTICULO.ID_art and OPEN_ACCESS.Tipo_oa!='[No disponible]'"
+        cons="SELECT DISTINCT OPEN_ACCESS.Tipo_oa, ARTICULO.Titulo from OPEN_ACCESS, OA_ARTICULO, ARTICULO WHERE OA_ARTICULO.ID_oa = OPEN_ACCESS.ID_oa AND ARTICULO.ID_art = OA_ARTICULO.ID_art and OPEN_ACCESS.Tipo_oa!='[No disponible]'"
         consulta.df_consulta(consulta, cons)
         general.df_oa_art=consulta.df
+        general.df_oa_art["Nombre_subcategoria"] = general.df_oa_art["Nombre_subcategoria"].replace({"[No disponible]": "Revistas por suscripción"})
         general.df_oa=general.df_oa_art.groupby('Tipo_oa').size().reset_index(name='Cantidad_articulos')
         graficos.pie(graficos, list(general.df_oa['Cantidad_articulos']), list(general.df_oa['Tipo_oa']), "Tipo_oa")
 
@@ -407,6 +334,88 @@ def guardar_df(df:pd.DataFrame):
     archivo=str(archivo)
     archivo=archivo.replace('/', '\\')
     df.to_excel(archivo)
+
+class graficos():
+    def __init__(self):
+        pass
+    
+    def treemap(self, valores: list, leyenda: list, nombre_graf: str):
+        for i in range(len(valores)):
+            leyenda[i]=leyenda[i]+" ("+str(valores[i])+")"
+        df=pd.DataFrame(dict(leyenda=leyenda, valores=valores))
+        fig=px.treemap(df, path=[px.Constant("all"),'leyenda'], values='valores')
+        fig.update_traces(root_color='lightgrey')
+        fig.update_layout(margin = dict(t=0, l=0, r=0, b=0))#las margenes en 0 evita los espacios en blanco fuera del grafico
+        fig.write_image(nombre_graf+".jpg")
+        fig.write_html(nombre_graf+".html")
+        #fig.show() #treemap plotly
+
+    def barchart(self, valores:list, leyenda:list, nombre_graf:str):
+        df=pd.DataFrame(dict(leyenda=leyenda, valores=valores))
+        fig = px.bar(df, y='valores', x='leyenda', text='leyenda')
+        fig.update_layout(showlegend=False)
+        fig.write_image(nombre_graf+".jpg")
+        fig.write_html(nombre_graf+".html")
+        #fig.show()
+    
+    def lotka(self, trabajos:list, autores:list):
+
+        fig = go.Figure(
+            data = [
+                go.Scatter(x=trabajos, y=autores, name="Autores"),
+                go.Scatter(x=trabajos, y=trabajos, name="Trabajos"),
+            ],
+            layout = {"xaxis": {"title": "Trabajos"}, "yaxis": {"title": "Autores"}, "title": "Lotka"}
+        )
+        fig.write_image("Lotka.jpg")
+        fig.write_html("Lotka.html")
+
+    def nubes_palabras(self, df, columna, nombre_graf):
+        t=[]
+        text = " ".join(review for review in df[columna].astype(str))
+
+        stopwords = set(STOPWORDS)
+        stopwords.update(["x", "y", "your", "yours", "yourself", "yourselves", "you", "yond", "yonder", "yon", "ye", "yet", "z", "zillion", "j", "u", "umpteen", "usually", "us", "username", "uponed", "upons", "uponing", "upon", "ups", "upping", "upped", "up", "unto", "until", "unless", "unlike", "unliker", "unlikest", "under", "underneath", "use", "used", "usedest", "r", "rath", "rather", "rathest", "rathe", "re", "relate", "related", "relatively", "regarding", "really", "res", "respecting", "respectively", "q", "quite", "que", "qua", "n", "neither", "neaths", "neath", "nethe", "nethermost", "necessary", "necessariest", "necessarier", "never", "nevertheless", "nigh", "nighest", "nigher", "nine", "noone", "nobody", "nobodies", "nowhere", "nowheres", "no", "noes", "nor", "nos", "no-one", "none", "not", "notwithstanding", "nothings", "nothing", "nathless", "natheless", "t", "ten", "tills", "till", "tilled", "tilling", "to", "towards", "toward", "towardest", "towarder", "together", "too", "thy", "thyself", "thus", "than", "that", "those", "thou", "though", "thous", "thouses", "thoroughest", "thorougher", "thorough", "thoroughly", "thru", "thruer", "thruest", "thro", "through", "throughout", "throughest", "througher", "thine", "this", "thises", "they", "thee", "the", "then", "thence", "thenest", "thener", "them", "themselves", "these", "therer", "there", "thereby", "therest", "thereafter", "therein", "thereupon", "therefore", "their", "theirs", "thing", "things", "three", "two", "o", "oh", "owt", "owning", "owned", "own", "owns", "others", "other", "otherwise", "otherwisest", "otherwiser", "of", "often", "oftener", "oftenest", "off", "offs", "offest", "one", "ought", "oughts", "our", "ours", "ourselves", "ourself", "out", "outest", "outed", "outwith", "outs", "outside", "over", "overallest", "overaller", "overalls", "overall", "overs", "or", "orer", "orest", "on", "oneself", "onest", "ons", "onto", "a", "atween", "at", "athwart", "atop", "afore", "afterward", "afterwards", "after", "afterest", "afterer", "ain", "an", "any", "anything", "anybody", "anyone", "anyhow", "anywhere", "anent", "anear", "and", "andor", "another", "around", "ares", "are", "aest", "aer", "against", "again", "accordingly", "abaft", "abafter", "abaftest", "abovest", "above", "abover", "abouter", "aboutest", "about", "aid", "amidst", "amid", "among", "amongst", "apartest", "aparter", "apart", "appeared", "appears", "appear", "appearing", "appropriating", "appropriate", "appropriatest", "appropriates", "appropriater", "appropriated", "already", "always", "also", "along", "alongside", "although", "almost", "all", "allest", "aller", "allyou", "alls", "albeit", "awfully", "as", "aside", "asides", "aslant", "ases", "astrider", "astride", "astridest", "astraddlest", "astraddler", "astraddle", "availablest", "availabler", "available", "aughts", "aught", "vs", "v", "variousest", "variouser", "various", "via", "vis-a-vis", "vis-a-viser", "vis-a-visest", "viz", "very", "veriest", "verier", "versus", "k", "g", "go", "gone", "good", "got", "gotta", "gotten", "get", "gets", "getting", "b", "by", "byandby", "by-and-by", "bist", "both", "but", "buts", "be", "beyond", "because", "became", "becomes", "become", "becoming", "becomings", "becominger", "becomingest", "behind", "behinds", "before", "beforehand", "beforehandest", "beforehander", "bettered", "betters", "better", "bettering", "betwixt", "between", "beneath", "been", "below", "besides", "beside", "m", "my", "myself", "mucher", "muchest", "much", "must", "musts", "musths", "musth", "main", "make", "mayest", "many", "mauger", "maugre", "me", "meanwhiles", "meanwhile", "mostly", "most", "moreover", "more", "might", "mights", "midst", "midsts", "h", "huh", "humph", "he", "hers", "herself", "her", "hereby", "herein", "hereafters", "hereafter", "hereupon", "hence", "hadst", "had", "having", "haves", "have", "has", "hast", "hardly", "hae", "hath", "him", "himself", "hither", "hitherest", "hitherer", "his", "how-do-you-do", "however", "how", "howbeit", "howdoyoudo", "hoos", "hoo", "w", "woulded", "woulding", "would", "woulds", "was", "wast", "we", "wert", "were", "with", "withal", "without", "within", "why", "what", "whatever", "whateverer", "whateverest", "whatsoeverer", "whatsoeverest", "whatsoever", "whence", "whencesoever", "whenever", "whensoever", "when", "whenas", "whether", "wheen", "whereto", "whereupon", "wherever", "whereon", "whereof", "where", "whereby", "wherewithal", "wherewith", "whereinto", "wherein", "whereafter", "whereas", "wheresoever", "wherefrom", "which", "whichever", "whichsoever", "whilst", "while", "whiles", "whithersoever", "whither", "whoever", "whosoever", "whoso", "whose", "whomever", "s", "syne", "syn", "shalling", "shall", "shalled", "shalls", "shoulding", "should", "shoulded", "shoulds", "she", "sayyid", "sayid", "said", "saider", "saidest", "same", "samest", "sames", "samer", "saved", "sans", "sanses", "sanserifs", "sanserif", "so", "soer", "soest", "sobeit", "someone", "somebody", "somehow", "some", "somewhere", "somewhat", "something", "sometimest", "sometimes", "sometimer", "sometime", "several", "severaler", "severalest", "serious", "seriousest", "seriouser", "senza", "send", "sent", "seem", "seems", "seemed", "seemingest", "seeminger", "seemings", "seven", "summat", "sups", "sup", "supping", "supped", "such", "since", "sine", "sines", "sith", "six", "stop", "stopped", "p", "plaintiff", "plenty", "plenties", "please", "pleased", "pleases", "per", "perhaps", "particulars", "particularly", "particular", "particularest", "particularer", "pro", "providing", "provides", "provided", "provide", "probably", "l", "layabout", "layabouts", "latter", "latterest", "latterer", "latterly", "latters", "lots", "lotting", "lotted", "lot", "lest", "less", "ie", "ifs", "if", "i", "info", "information", "itself", "its", "it", "is", "idem", "idemer", "idemest", "immediate", "immediately", "immediatest", "immediater", "in", "inwards", "inwardest", "inwarder", "inward", "inasmuch", "into", "instead", "insofar", "indicates", "indicated", "indicate", "indicating", "indeed", "inc", "f", "fact", "facts", "fs", "figupon", "figupons", "figuponing", "figuponed", "few", "fewer", "fewest", "frae", "from", "failing", "failings", "five", "furthers", "furtherer", "furthered", "furtherest", "further", "furthering", "furthermore", "fourscore", "followthrough", "for", "forwhy", "fornenst", "formerly", "former", "formerer", "formerest", "formers", "forbye", "forby", "fore", "forever", "forer", "fores", "four", "d", "ddays", "dday", "do", "doing", "doings", "doe", "does", "doth", "downwarder", "downwardest", "downward", "downwards", "downs", "done", "doner", "dones", "donest", "dos", "dost", "did", "differentest", "differenter", "different", "describing", "describe", "describes", "described", "despiting", "despites", "despited", "despite", "during", "c", "cum", "circa", "chez", "cer", "certain", "certainest", "certainer", "cest", "canst", "cannot", "cant", "cants", "canting", "cantest", "canted", "co", "could", "couldst", "comeon", "comeons", "come-ons", "come-on", "concerning", "concerninger", "concerningest", "consequently", "considering", "e", "eg", "eight", "either", "even", "evens", "evenser", "evensest", "evened", "evenest", "ever", "everyone", "everything", "everybody", "everywhere", "every", "ere", "each", "et", "etc", "elsewhere", "else", "ex", "excepted", "excepts", "except", "excepting", "exes", "enough", "qué","porque","posible","primer","primera","primero","primeros","principalmente","pronto","propia","propias","propio","propios","proximo","próximo","próximos","pudo","pueda","puede","pueden","puedo","pues","q","qeu","que","quedó","queremos","quien","quienes","quiere","quiza","quizas","quizá","quizás","quién","quiénes","qué","r","raras","realizado","realizar","realizó","repente","respecto","s","sabe","sabeis","sabemos","saben","saber","sabes","sal","salvo","se","sea","seamos","sean","seas","segun","segunda","segundo","según","seis","ser","sera","seremos","será","serán","serás","seré","seréis","sería","seríais","seríamos","serían","serías","seáis","señaló","si","sido","siempre","siendo","siete","sigue","siguiente","sin","sino","sobre","sois","sola","solamente","solas","solo","solos","somos","son","soy","soyos","su","supuesto","sus","suya","suyas","suyo","suyos","sé","sí","sólo","t","tal","tambien","también","tampoco","tan","tanto","tarde","te","temprano","tendremos","tendrá","tendrán","tendrás","tendré","tendréis","tendría","tendríais","tendríamos","tendrían","tendrías","tened","teneis","tenemos","tener","tenga","tengamos","tengan","tengas","tengo","tengáis","tenida","tenidas","tenido","tenidos","teniendo","tenéis","tenía","teníais","teníamos","tenían","tenías","tercera","ti","tiempo","tiene","tienen","tienes","toda","todas","todavia","todavía","todo","todos","total","trabaja","trabajais","trabajamos","trabajan","trabajar","trabajas","trabajo","tras","trata","través","tres","tu","tus","tuve","tuviera","tuvierais","tuvieran","tuvieras","tuvieron","tuviese","tuvieseis","tuviesen","tuvieses","tuvimos","tuviste","tuvisteis","tuviéramos","tuviésemos","tuvo","tuya","tuyas","tuyo","tuyos","tú","u","ultimo","un","una","unas","uno","unos","usa","usais","usamos","usan","usar","usas","uso","usted","ustedes","v","va","vais","valor","vamos","van","varias","varios","vaya","veces","ver","verdad","verdadera","verdadero","vez","vosotras","vosotros","voy","vuestra","vuestras","vuestro","vuestros","w","x","y","ya","yo","z","él","éramos","ésa","ésas","ése","ésos","ésta","éstas","éste","éstos","última","últimas","último","últimos"])
+
+        wordcloud = WordCloud(stopwords=stopwords, background_color="white", width=1344, height=743).generate(text)
+        t.append([palabra for palabra in text.split(' ') if palabra not in stopwords])
+        df=pd.DataFrame(t)
+        df=df.T
+        df=df.rename(columns={0:'Palabra'})
+        df =  df.groupby('Palabra').size().reset_index(name='Repeticiones')
+        df = df.sort_values(by='Repeticiones', ascending=False) #ordena las repeticiones de mayor a menor
+
+        plt.axis("off")
+        plt.figure( figsize=(40,20))
+        plt.tight_layout(pad=0)
+        plt.imshow(wordcloud, interpolation='bilinear')
+        plt.axis('off')
+        plt.savefig(nombre_graf+".png", bbox_inches='tight',pad_inches = 0)
+
+        return df
+    
+    def lineas(self, valores:list, leyenda:list, nombre_graf:str):
+        df=pd.DataFrame(dict(leyenda=leyenda, valores=valores))
+        fig = px.line(df, x=leyenda, y=valores, title=nombre_graf)
+        fig.update_layout(showlegend=False)
+        fig.write_image(nombre_graf+".jpg")
+        fig.write_html(nombre_graf+".html")
+
+
+    def pie(self, valores:list, leyenda:list, nombre_graf:str):
+        # This dataframe has 244 lines, but 4 distinct values for `day`
+        df=pd.DataFrame(dict(leyenda=leyenda, valores=valores))
+        fig = px.pie(df, values=valores, names=leyenda)
+        fig.write_image(nombre_graf+".jpg")
+        fig.write_html(nombre_graf+".html")
+
+    def mapa_paises(self, df:pd.DataFrame):
+        fig = px.choropleth(df, locations="Codigo",
+                            color="Cantidad_articulos", # lifeExp is a column of gapminder
+                            hover_name="Nombre_pais", # column to add to hover information
+                            color_continuous_scale=px.colors.sequential.Plasma)
+        fig.write_image("mapa.jpg")
+        fig.write_html("mapa.html")
 
 def guardar_modelo_excel():
     import os

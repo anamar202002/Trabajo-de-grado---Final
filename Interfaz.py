@@ -93,13 +93,11 @@ class program (Tk):
         Label(titulo, text=texto.get(), font=("Verdana",24)).place(rely=0, relx=0, relheight=1, relwidth=1)
 
 
-        linea=Frame(self.principal_f)
-        linea.place(relwidth=0.001, relheight=1, relx=0.25, rely=0.13)
         modelo_f=Frame(self.principal_f)
         modelo_f.place(relwidth=0.7, relheight=1-0.16, relx=0.27, rely=0.12)
 
         self.opc_f=Frame(self.principal_f, bg="lightblue1")
-        self.opc_f.place(relwidth=0.2, relheight=0.94, relx=0.025, rely=0.03)
+        self.opc_f.place(relwidth=0.25, relheight=0.94, relx=0.025, rely=0.015)
         self.imagenes(modelo_f, "modelo.png")
         Button(self.opc_f, text="Modelo entidad-relación \n (utilizado para la creación \n de la base de datos) ", command=lambda:[self.clearFrame(modelo_f), self.imagenes(modelo_f, "modelo.png")]).pack(padx=10, pady=20, ipadx=10, ipady=10)
         Label(self.opc_f, text="Los registros para cada base de datos son los siguientes:", bg="lightblue1").pack()
@@ -113,34 +111,43 @@ class program (Tk):
         texto.set("Un archivo compilado con "+str(len(baseDatos.completo))+ " registros")
         Button(self.opc_f, text=texto.get(), command=lambda:[self.clearFrame(modelo_f), self.tabla(modelo_f, baseDatos.completo, "Completo")]).pack(padx=10, pady=10, ipadx=10, ipady=5)
         
-        Label(self.opc_f, text="Tras la limpieza de los datos se logran recuperar : ", bg="lightblue1").pack(padx=10, pady=10, ipadx=10, ipady=5)
-        texto.set("•"+str(len(baseDatos.INSTITUCION))+ " instituciones pertenecientes a " + str(len(self.c.df_consulta(self.c, "SELECT DISTINCT Titulo  from INSTITUCION, INSTITUCION_ARTICULO, ARTICULO WHERE INSTITUCION.ID_institucion = INSTITUCION_ARTICULO.ID_institucion and ARTICULO.ID_art = INSTITUCION_ARTICULO.ID_art AND INSTITUCION.Nombre_institucion != '[No disponible]'")))+ " registros")
-        Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=40)
-        texto.set("•"+str(len(baseDatos.AUTOR))+ " autores")
-        Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=40)
-        texto.set("•"+str(len(baseDatos.PAIS)-1)+ " paises pertenecientes a " + str(len(self.c.df_consulta(self.c, "SELECT DISTINCT Nombre_institucion from INSTITUCION, PAIS WHERE INSTITUCION.ID_pais= PAIS.ID_pais AND PAIS.Nombre_pais !=  '[No disponible]'")))+ " instituciones, \n no se recuperaron todos los paises \n de las instituciones por datos incompletos")
-        Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=40)
-        texto.set("•"+str(len(baseDatos.CATEGORIA))+ " categorias (Scopus no tiene categorías)" )
-        Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=40)
-        texto.set("•"+str(len(baseDatos.SUB_CATEGORIA))+ " subcategorias (Web of Science \n es el único con subcategorías)" )
-        Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=40)
-        texto.set("•"+str(len(baseDatos.AU_KEYWORD))+ " palabras clave del autor" )
-        Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=40)
-        texto.set("•"+str(len(baseDatos.BDKEYWORD))+ " palabras clave de la base de datos" )
-        Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=40)
-        texto.set("•"+str(len(baseDatos.FINANCIAMIENTO)-1)+ " patrocinadores pertenecientes a " + str(len(self.c.df_consulta(self.c, "SELECT DISTINCT Titulo from FINANCIAMIENTO_ARTICULO, ARTICULO, FINANCIAMIENTO where FINANCIAMIENTO_ARTICULO.ID_art = ARTICULO.ID_art AND FINANCIAMIENTO.ID_fin = FINANCIAMIENTO_ARTICULO.ID_fin AND FINANCIAMIENTO.Institucion != '[No disponible]'"))) + " registros")
-        Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=40)
-        texto.set("•"+str(len(baseDatos.FUENTE)) + " revistas")
-        Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=40)
-        texto.set("•"+str(len(baseDatos.OPEN_ACCESS)) + " tipos de acceso abierto")
-        Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=40)
+        Button(self.opc_f, text="Continuar a la limpieza ", command=lambda:[
+            self.clearFrame(self.opc_f),
+            Label(self.opc_f, text="Tras la limpieza de los datos se logran recuperar : ", bg="lightblue1").pack(padx=10, pady=10, ipadx=10, ipady=5),
+            texto.set("•"+str(len(baseDatos.INSTITUCION))+ " instituciones pertenecientes a " + str(len(self.c.df_consulta(self.c, "SELECT DISTINCT Titulo  from INSTITUCION, INSTITUCION_ARTICULO, ARTICULO WHERE INSTITUCION.ID_institucion = INSTITUCION_ARTICULO.ID_institucion and ARTICULO.ID_art = INSTITUCION_ARTICULO.ID_art AND INSTITUCION.Nombre_institucion != '[No disponible]'")))+ " registros"),
+            Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=10),
+            texto.set("•"+str(len(baseDatos.AUTOR))+ " autores"),
+            Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=10),
+            texto.set("•"+str(len(baseDatos.PAIS)-1)+ " paises pertenecientes a " + str(len(self.c.df_consulta(self.c, "SELECT DISTINCT Nombre_institucion from INSTITUCION, PAIS WHERE INSTITUCION.ID_pais= PAIS.ID_pais AND PAIS.Nombre_pais !=  '[No disponible]'")))+ " instituciones, \n no se recuperaron todos los paises \n de las instituciones por datos incompletos"),
+            Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=10),
+            texto.set("•"+str(len(baseDatos.CATEGORIA))+ " categorias (Scopus no tiene categorías)" ),
+            Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=10),
+            texto.set("•"+str(len(baseDatos.SUB_CATEGORIA))+ " subcategorias (Web of Science \n es el único con subcategorías)" ),
+            Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=10),
+            texto.set("•"+str(len(baseDatos.AU_KEYWORD))+ " palabras clave del autor" ),
+            Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=10),
+            texto.set("•"+str(len(baseDatos.BDKEYWORD))+ " palabras clave de la base de datos" ),
+            Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=10),
+            texto.set("•"+str(len(baseDatos.FINANCIAMIENTO)-1)+ " patrocinadores pertenecientes a " + str(len(self.c.df_consulta(self.c, "SELECT DISTINCT Titulo from FINANCIAMIENTO_ARTICULO, ARTICULO, FINANCIAMIENTO where FINANCIAMIENTO_ARTICULO.ID_art = ARTICULO.ID_art AND FINANCIAMIENTO.ID_fin = FINANCIAMIENTO_ARTICULO.ID_fin AND FINANCIAMIENTO.Institucion != '[No disponible]'"))) + " registros"),
+            Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=10),
+            texto.set("•"+str(len(baseDatos.FUENTE)) + " revistas"),
+            Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=10),
+            texto.set("•"+str(len(baseDatos.OPEN_ACCESS)) + " tipos de acceso abierto"),
+            Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=10),
 
-        Button(self.opc_f, text="Exportar todas las tablas \n del modelo a archivos de excel ", command=self.exportar).pack(padx=10, pady=20, ipadx=10, ipady=10)
-
+            Button(self.opc_f, text="Exportar todas las tablas \n del modelo a archivos de excel", command=self.exportar).pack(padx=10, pady=20, ipadx=10, ipady=10),
+            Button(self.opc_f, text="Atras", command=self.corpus_documental).pack(padx=10, pady=20)
+        ]).pack(padx=10, pady=10, ipadx=10, ipady=10)
+   
     def exportar(self):
         texto = tkinter.StringVar()
         texto.set(self.funcionalidades.guardar_modelo_excel()) 
-        Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=40)
+        txt = tkinter.Text(self.opc_f, height=20)
+        txt.insert(1.0, texto.get())
+        txt.pack(anchor="w", padx=10)
+        txt.configure(bg=self.opc_f.cget('bg'), relief="flat")
+        txt.configure(state="disabled")
+        #Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=10)
 
 
     
@@ -254,7 +261,7 @@ class program (Tk):
         trabajos = tkinter.Entry(self.graf1, width=25)
         trabajos.place(relx=0.2, rely=0.8, relheight=0.03, relwidth=0.1)
         tkinter.Label(self.graf1,text=f'Digite la cantidad de trabajos para saber cuántos \n autores lo han publicado').place(relx=0, rely=0.72)
-        Button(self.graf1, text="Calcular", command=lambda:[self.calculo_lotka(int(trabajos.get()))]).place(relx=0.2, rely=0.84, relheight=0.03, relwidth=0.1)
+        Button(self.graf1, text="Calcular", command=lambda:[tkinter.Label(self.graf1, text=self.autores.calculo_lotka(self.autores, int(trabajos.get()))).place(relx=0, rely=0.88, relheight=0.05, relwidth=0.5)]).place(relx=0.2, rely=0.84, relheight=0.03, relwidth=0.1)
 
         tkinter.Label(self.graf2, text="SE VA EXPLICAR DE QUÉ TRATA LA LEY DE LOTKA").place(relx=0, rely=0, relheight=0.4, relwidth=1)
         tkinter.Label(self.graf2, text="AUTORES ÉLITE").place(relx=0, rely=0.41, relheight=0.05, relwidth=0.5)
@@ -275,14 +282,7 @@ class program (Tk):
         self.tabla(self.f_au_art, self.autores.filtrado_df, 0)
         tkinter.Label(self.graf2, text=self.tv_elite.item(item, "values")[0]).place(relx=0.8, rely=0.41, relheight=0.05, relwidth=0.2)
     
-    def calculo_lotka(self, n:int):
-        aux=self.autores.df_lotka.where(self.autores.df_lotka.Cantidad_articulos==1)
-        aux=aux.dropna()
-        a=aux['Cantidad_autores'][0]
-        a=int(a)
-        v=a/pow(n, 2)
-
-        tkinter.Label(self.graf1, text="Para "+str(n)+" documentos segun Lotka existirán "+str(v)+" autores.").place(relx=0, rely=0.88, relheight=0.05, relwidth=0.5)
+        
 
     def graficos_revistas(self):
         

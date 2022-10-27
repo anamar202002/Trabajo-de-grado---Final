@@ -5,7 +5,8 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 archivo=''
 
-#cada clase crea una tabla diferente con sus atributos
+#Cada clase crea una tabla diferente con sus atributos y relaciones
+#Artículos
 class articulo (Base):
     __tablename__ = "ARTICULO"
     ID_art = Column(Integer, primary_key=True)
@@ -138,7 +139,7 @@ class open_access (Base):
 
 #Se ejecuta cuándo se importa la clase, permite guardar el modelo de datos .db dentro del lugar que desea el usuario, crea el motor y guarda lo que se hizo anteriormente
 if __name__ != "__main__": #lo voy a ejecutar desde otro lugar
-    archivo = filedialog.asksaveasfilename(title='Guardar base de datos...', defaultextension='.db', filetypes=[('Base de datos', '*.db')]) #va título, directorio de inicio (raíz) tipos que soporta //  initialdir='/', para inicializar el directorio en el puro inicio
+    archivo = filedialog.asksaveasfilename(title='Guardar base de datos...', defaultextension='.db', filetypes=[('Base de datos', '*.db')]) #Pide guardar el archivo .db
     if not archivo.endswith('.db'):
             archivo += '.db'
     archivo=str(archivo)
