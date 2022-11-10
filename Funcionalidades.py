@@ -46,7 +46,7 @@ class autores(): #Se realiza la consulta de los autores más citados y los autor
         autores.df_au_elite=autores.df_au_pro
         autores.df_au_elite= autores.df_au_elite.where(autores.df_au_elite['Cantidad_articulos']>=t[resta.index(min(resta))])
         autores.df_au_elite=autores.df_au_elite.dropna()
-        autores.df_au_elite=autores.df_au_elite.sort_values(by="Cantidad_articulos", ascending=True)
+        autores.df_au_elite=autores.df_au_elite.sort_values(by="Cantidad_articulos", ascending=False)
         autores.df_au_elite=autores.df_au_elite.reset_index(drop=True)
         print(autores.df_au_elite)
     
@@ -244,7 +244,7 @@ class general():
         cons="SELECT DISTINCT OPEN_ACCESS.Tipo_oa, ARTICULO.Titulo from OPEN_ACCESS, OA_ARTICULO, ARTICULO WHERE OA_ARTICULO.ID_oa = OPEN_ACCESS.ID_oa AND ARTICULO.ID_art = OA_ARTICULO.ID_art and OPEN_ACCESS.Tipo_oa!='[No disponible]'"
         consulta.df_consulta(consulta, cons)
         general.df_oa_art=consulta.df
-        general.df_oa_art["Nombre_subcategoria"] = general.df_oa_art["Nombre_subcategoria"].replace({"[No disponible]": "Revistas por suscripción"})
+        general.df_oa_art["Tipo_oa"] = general.df_oa_art["Tipo_oa"].replace({"[No disponible]": "Revistas por suscripción"})
         general.df_oa=general.df_oa_art.groupby('Tipo_oa').size().reset_index(name='Cantidad_articulos')
         graficos.pie(graficos, list(general.df_oa['Cantidad_articulos']), list(general.df_oa['Tipo_oa']), "Tipo_oa")
 
@@ -396,7 +396,7 @@ class graficos():
     
     def lineas(self, valores:list, leyenda:list, nombre_graf:str):
         df=pd.DataFrame(dict(leyenda=leyenda, valores=valores))
-        fig = px.line(df, x=leyenda, y=valores, title=nombre_graf)
+        fig = px.line(df, x=leyenda, y=valores)
         fig.update_layout(showlegend=False)
         fig.write_image(nombre_graf+".jpg")
         fig.write_html(nombre_graf+".html")

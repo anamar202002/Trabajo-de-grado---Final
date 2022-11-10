@@ -5,6 +5,8 @@ import tkinter
 from PIL import ImageTk, Image
 
 
+
+
 class program (Tk):
     def __init__(self):        
         super(program, self).__init__()
@@ -68,7 +70,7 @@ class program (Tk):
 
 
         self.state("zoomed")
-               
+        
         pestañas_f=Frame(self, bg="cornflower blue")
         pestañas_f.place(relheight=0.1, relwidth=1, relx=0, rely=0.9)
         self.principal_f=Frame(self)
@@ -218,7 +220,7 @@ class program (Tk):
         panel = ttk.Button(graf1, image = img, command=lambda:[self.tabla_ventana_emergente(self.instituciones.df_ins_pro, "Producción por institución")])#incluir comando que abre el treeview con todo el df usado por el grafico,opcion arriba de ver el grafico completo
         panel.image=img        
         panel.place(relx=0.9, rely=0.9, relheight=0.1, relwidth=0.1)
-
+        
         lotka_b=ttk.Button(self.principal_f, text="->", command=self.lotka)
         lotka_b.place(rely=0.45, relx=0.98, relheight=0.15, relwidth=0.02)
 
@@ -427,7 +429,7 @@ class program (Tk):
         opc_f.place(relwidth=0.2, relheight=1-0.16, relx=0.025, rely=0.12)
      
         Button(opc_f, text="Autor (keywords)", command=lambda:[self.graficos(nube_f, "au_keys.png")]).place(relx=0.07, rely=0.05)
-        Button(opc_f, text="Base de datos (keywords)", command=lambda:[self.graficos(nube_f, "bd_keys.png")]).place(relx=0.07, rely=0.1)
+        Button(opc_f, text="Keyword Plus", command=lambda:[self.graficos(nube_f, "bd_keys.png")]).place(relx=0.07, rely=0.1)
 
         self.t_palabras=Frame(opc_f)
         self.t_palabras.place(relx=0.05, rely=0.15, relheight=0.8, relwidth=0.9)
@@ -443,7 +445,7 @@ class program (Tk):
         if self.p.find("au") != -1:
             self.tv_palabras=self.tabla(self.t_palabras, self.palabra.Autor_keyword, "Autor")
         elif self.p.find("bd")!=-1:
-            self.tv_palabras=self.tabla(self.t_palabras, self.palabra.BD_keyword, "Base de datos")
+            self.tv_palabras=self.tabla(self.t_palabras, self.palabra.BD_keyword, "Keyword Plus")
         self.tv_palabras.bind("<Double-1>", self.click_palabra)
 
     def click_palabra(self, e):

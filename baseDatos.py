@@ -43,7 +43,7 @@ class baseDatos():
     #Ejecución de cada botón almacenado en la interfaz donde se llama la función método para poder leer el archivo, llenar el atributo de clase, seleccionar las columnas deseadas para la realización del código y son renombradas para que puedan ser concatenadads posteriormente
     def ejecutar_wos(self):
         baseDatos.wos=self.seleccionar_archivo(self, '*.txt')  #retorna un DataFrame
-        baseDatos.wos = pd.DataFrame(baseDatos.wos, columns=['TI', 'AU', 'DE', 'ID', 'WC', 'SO', 'AB', 'Z9', 'C3', 'PU', 'C1', 'SN', 'EI', 'BN', 'DI', 'FU', 'OA', 'PY', 'LA', 'WE', 'UT', 'DT'])
+        baseDatos.wos = pd.DataFrame(baseDatos.wos, columns=['TI', 'AU', 'DE', 'ID', 'WC', 'SO', 'AB', 'Z9', 'PU', 'C1', 'SN', 'EI', 'BN', 'DI', 'FU', 'OA', 'PY', 'LA', 'WE', 'UT', 'DT'])
         baseDatos.wos=baseDatos.wos.rename(columns={'TI' : 'Titulo' , 'AU' : 'Nombre_autor' , 'DE' : 'Autor_keyword' , 'ID' : 'palabras_clave_base_de_datos' , 'WC' : 'categorias' , 'SO' : 'Nombre_fuente' , 'AB' : 'Resumen' , 'Z9' : 'Citas_recibidas' , 'PU' : 'Editorial' , 'C1' : 'paises' , 'SN' : 'ISSN' , 'EI' : 'eISSN' , 'BN' : 'ISBN' , 'DI' : 'DOI' , 'FU' : 'financiamiento' , 'OA' : 'open_access' , 'PY' : 'Anio' , 'LA' : 'Idioma' , 'WE' : 'Base_de_datos' , 'UT' : 'Num_acceso' , 'DT' : 'Tipo_de_documento'})        
     
     def ejecutar_scopus(self):
@@ -102,6 +102,7 @@ class baseDatos():
     def limpiar(self):
         baseDatos.completo.reset_index(drop=True, inplace=True) #drop borra inplace reemplaza y así se tienen los ID resueltos
         baseDatos.completo=baseDatos.completo.fillna({'Citas_recibidas':0.0}) #Llenar las filas de citas vacias con 0.0
+        baseDatos.completo=baseDatos.completo.fillna({'open_access':"Acceso por Suscripción"}) #Llenar las filas de citas vacias con 0.0
         baseDatos.completo=baseDatos.completo.fillna('[No disponible]')#llenar los valores vacios con "[No disponible]"
         self.creacion_tablas(self)
 
@@ -275,13 +276,13 @@ class baseDatos():
         indices=[]
         for j in baseDatos.CATEGORIA_ARTICULO.Nombre_categoria:
             aux='"'+j+'"'
-            indices.append([baseDatos.CATEGORIA_ARTICULO.index[baseDatos.CATEGORIA_ARTICULO['Nombre_categoria']==j]][0][0])
+            indices.append([baseDatos.CATEGORIA.index[baseDatos.CATEGORIA['Nombre_categoria']==j]][0][0])
         baseDatos.CATEGORIA_ARTICULO['ID_cat']=indices
 
         indices=[]
         for j in baseDatos.CATEGORIA_ARTICULO.Nombre_subcategoria:
             aux='"'+j+'"'
-            indices.append([baseDatos.CATEGORIA_ARTICULO.index[baseDatos.CATEGORIA_ARTICULO['Nombre_subcategoria']==j]][0][0])
+            indices.append([baseDatos.SUB_CATEGORIA.index[baseDatos.SUB_CATEGORIA['Nombre_subcategoria']==j]][0][0])
         baseDatos.CATEGORIA_ARTICULO['ID_subcat']=indices
         baseDatos.CATEGORIA_ARTICULO=pd.DataFrame(baseDatos.CATEGORIA_ARTICULO, columns={'ID_art', 'ID_cat', 'ID_subcat'})
         baseDatos.CATEGORIA_ARTICULO= baseDatos.CATEGORIA_ARTICULO.rename_axis('ID_cat_art')
@@ -315,11 +316,11 @@ class baseDatos():
 #Método para buscar un país dentro de la base de datos de Excel de paises, retorna = "Código; Nombre_pais"
     def busca_pais(self, texto:str):
         for index, fila in baseDatos.df_paises.iterrows(): #Recorre el DataFrame
-            if texto.find(str(fila['Country'])) != -1: #Busca en país
+            if texto.find(str(fila['Country'])) != -1 or str(fila['Country']).find(str(texto)) != -1: #Busca en país
                 return str(fila['Code'])+"; "+ str(fila['Country'])
-            elif texto.find(str(fila['Esp'])) != -1:
+            elif texto.find(str(fila['Esp'])) != -1 or str(fila['Esp']).find(str(texto)) != -1:
                 return str(fila['Code'])+"; "+ str(fila['Country'])
-            elif texto.find(str(fila['Por'])) != -1:
+            elif texto.find(str(fila['Por'])) != -1 or str(fila['Por']).find(str(texto)) != -1:
                 return str(fila['Code'])+"; "+ str(fila['Country'])
         return "[No disponible]"
             
@@ -354,7 +355,10 @@ class baseDatos():
 
                 if cont < len(baseDatos.wos.index)+len(baseDatos.scielo.index): #Si está entre wos o scielo
                     #separa las cadenas por , donde esta la institución
-                    pais=self.busca_pais(self, str(ins[-1])) #El país se encuentra en la última posición
+                    if str(ins[-1]).find(" USA")!=-1 or str(ins[-1]).find(" usa")!=-1 or str(ins[-1]).find(" USA	")!=-1: 
+                        pais=self.busca_pais(self, "Estados Unidos de América") #El país se encuentra en la última posición
+                    else: 
+                        pais=self.busca_pais(self, str(ins[-1]))
                     #lograr que si solo hay un registro entonces omita el pais
                     if len(ins)==1:
                         tabla_art_ins.append([cont, ins[0].strip(), '[No disponible]']) #Strip elimina los espacios al inicio y al final de cada cadena
@@ -472,7 +476,7 @@ class baseDatos():
                         if i == 0:
                             f=sponsor[i]
                             f = f.replace(u'\xa0', u' ')
-                            f=f.split('; ') #bien
+                            f=f.split('; ')
                             for n in f:
                                 if len(f)==1: n=f
                                 n=str(n)
