@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 from baseDatos import baseDatos
 
 
-class autores(): #Se realiza la consulta de los autores más citados y los autores con mayor cantidad de artículos escritos
-    #df=pd.read_excel("autores.xlsx", index_col=0)
+class autores(): 
+    #Se realiza la consulta de los autores más citados y los autores con mayor cantidad de artículos escritos
     nombre="nombre_autor"
     codConsulta= "SELECT "+ nombre + ", Citas_recibidas, Titulo FROM articulo, autor, autor_articulo where articulo.ID_art = autor_articulo.ID_art AND autor.ID_au = autor_articulo.ID_au"
     df=consulta.df_consulta(consulta, codConsulta)
@@ -67,7 +67,6 @@ class autores(): #Se realiza la consulta de los autores más citados y los autor
     
 
 class revistas(): #Se realiza la consulta de las revistas
-    #df=pd.read_excel("revistas.xlsx", index_col=0)
     nombre="Nombre_fuente"
     codConsulta= "SELECT "+ nombre + ", ISSN, eISSN, ISBN, Titulo, Citas_recibidas FROM FUENTE, ARTICULO WHERE ARTICULO.ID_fuente=FUENTE.ID_fuente"
     
@@ -84,9 +83,8 @@ class revistas(): #Se realiza la consulta de las revistas
     def revistas_mas_citados(self):
         revistas.df_rev_cit=pd.DataFrame(revistas.df, columns=['Nombre_fuente', 'Citas_recibidas'])
         revistas.df_rev_cit['Citas_recibidas']=revistas.df_rev_cit['Citas_recibidas'].astype(float)
-        revistas.df_rev_cit = revistas.df_rev_cit.groupby('Nombre_fuente').sum() #funciona, pone como indice le nombre autor
-        #no ordena bien y me pone otros valores x
-        revistas.df_rev_cit = revistas.df_rev_cit.sort_values(by='Citas_recibidas', ascending=False) #ordena los articulos de mayor a menor
+        revistas.df_rev_cit = revistas.df_rev_cit.groupby('Nombre_fuente').sum()
+        revistas.df_rev_cit = revistas.df_rev_cit.sort_values(by='Citas_recibidas', ascending=False)
         revistas.df_rev_cit=revistas.df_rev_cit.reset_index()
         aux=revistas.df_rev_cit.head(15)
         graficos.treemap(graficos, list(aux['Citas_recibidas']), list(aux['Nombre_fuente']), "RevistasMasCitados")
@@ -101,13 +99,9 @@ class revistas(): #Se realiza la consulta de las revistas
     def bradford(self):
         cant=list(revistas.df_rev_pro['Cantidad_articulos'])
         revistas.df_bradford=revistas.df_rev_pro
-
         ind=sum(cant)/3
         ind=int(ind)#aproxima a un valor exacto
         zonas=[]
-
-        print(ind)
-        
         cont=0
         z=1
         r=0
@@ -124,9 +118,9 @@ class revistas(): #Se realiza la consulta de las revistas
                 zonas.append("Zona "+str(z))
             r+=1
         revistas.zonas_b.append([r, round((r/len(cant))*100, 2), cont, round((cont/sum(cant))*100, 2)])
+        revistas.df_bradford["Zona"]=zonas
         
         print(len(zonas), len(cant))
-        revistas.df_bradford["Zona"]=zonas
         print(revistas.df_bradford)
         print(revistas.zonas_b)
     
@@ -143,15 +137,12 @@ class revistas(): #Se realiza la consulta de las revistas
         revistas.filtrado_df=c.df
 
 class instituciones(): #Se realiza la consulta de los instituciones más citados y los instituciones con mayor cantidad de artículos escritos
-    #df=pd.read_excel("instituciones.xlsx", index_col=0)
     nombre="Nombre_institucion"
     codConsulta= "SELECT " +nombre+ ", Titulo  from INSTITUCION, INSTITUCION_ARTICULO, ARTICULO WHERE INSTITUCION.ID_institucion = INSTITUCION_ARTICULO.ID_institucion and ARTICULO.ID_art = INSTITUCION_ARTICULO.ID_art"
     
     df=consulta.df_consulta(consulta, codConsulta)
     filtrado_df=consulta.df
     df_ins_pro=pd.DataFrame()
-    df_lotka = pd.DataFrame()
-    df_au_elite = pd.DataFrame()
 
     def __init__(self):
         super().__init__() 
@@ -207,13 +198,11 @@ class pais():
     def colaboración(self):
         pais.df_colaboracion = pais.df_pais_articulo.groupby('Titulo').size().reset_index(name='Cantidad_Paises')
         pais.df_colaboracion['Colaboracion']= np.where(pais.df_colaboracion['Cantidad_Paises']>1, 'Internacional', 'Nacional')
-        print(pais.df_colaboracion)
+        
         df1=consulta.df_consulta(consulta, "SELECT Titulo, COUNT(*) AS Cantidad_autores FROM ARTICULO, AUTOR, AUTOR_ARTICULO WHERE AUTOR_ARTICULO.ID_au = AUTOR.ID_au AND ARTICULO.ID_art = AUTOR_ARTICULO.ID_art GROUP by Titulo having count(*) == 1")
-        print(df1)
         titulos=list(df1['Titulo'])
         for fila in titulos:
             pais.df_colaboracion.iloc[pais.df_colaboracion.index[pais.df_colaboracion['Titulo'] == fila], 2]="Sin colaboración"
-
         df = pais.df_colaboracion.groupby('Colaboracion').size().reset_index(name='Cantidad_Paises')
         graficos.pie(graficos, list(df['Cantidad_Paises']), list(df['Colaboracion']), "ColaboracionPaises")
 
@@ -249,7 +238,7 @@ class general():
         graficos.pie(graficos, list(general.df_oa['Cantidad_articulos']), list(general.df_oa['Tipo_oa']), "Tipo_oa")
 
     def categoria(self):
-        cons="SELECT CATEGORIA.Nombre_categoria, SUB_CATEGORIA.Nombre_subcategoria, ARTICULO.Titulo FROM CATEGORIA, CATEGORIA_ARTICULO, ARTICULO, SUB_CATEGORIA WHERE CATEGORIA_ARTICULO.ID_art = ARTICULO.ID_art AND CATEGORIA_ARTICULO.ID_cat = CATEGORIA.ID_cat AND CATEGORIA_ARTICULO.ID_subcat = SUB_CATEGORIA.ID_subcat"
+        cons="SELECT CATEGORIA.Nombre_categoria, SUB_CATEGORIA.Nombre_subcategoria, ARTICULO.Titulo FROM CATEGORIA, CATEGORIA_ARTICULO, ARTICULO, SUB_CATEGORIA WHERE CATEGORIA_ARTICULO.ID_art = ARTICULO.ID_art AND CATEGORIA_ARTICULO.ID_cat = CATEGORIA.ID_cat AND CATEGORIA_ARTICULO.ID_subcat = SUB_CATEGORIA.ID_subcat AND CATEGORIA.Nombre_categoria != '[No disponible]'"
         general.df_categoria=consulta.df_consulta(consulta, cons)
         general.df_categoria["Nombre_subcategoria"] = general.df_categoria["Nombre_subcategoria"].replace({"[No disponible]": "Sin subcategoría"})
         fig = px.treemap(general.df_categoria, path=[px.Constant("Categoria"), 'Nombre_categoria', 'Nombre_subcategoria'])
@@ -327,13 +316,6 @@ class general():
         return general.df_financiamiento_art[general.df_financiamiento_art['Institucion'] == str(fin_ins)]
 
 
-def guardar_df(df:pd.DataFrame):
-    archivo = filedialog.asksaveasfilename(title='Guardar tabla...', defaultextension='.xlsx', filetypes=[('XLSX', '*.xlsx')]) #va título, directorio de inicio (raíz) tipos que soporta //  initialdir='/', para inicializar el directorio en el puro inicio
-    if not archivo.endswith('.xlsx'):
-            archivo += '.xlsx'
-    archivo=str(archivo)
-    archivo=archivo.replace('/', '\\')
-    df.to_excel(archivo)
 
 class graficos():
     def __init__(self):
@@ -348,7 +330,6 @@ class graficos():
         fig.update_layout(margin = dict(t=0, l=0, r=0, b=0))#las margenes en 0 evita los espacios en blanco fuera del grafico
         fig.write_image(nombre_graf+".jpg")
         fig.write_html(nombre_graf+".html")
-        #fig.show() #treemap plotly
 
     def barchart(self, valores:list, leyenda:list, nombre_graf:str):
         df=pd.DataFrame(dict(leyenda=leyenda, valores=valores))
@@ -356,7 +337,6 @@ class graficos():
         fig.update_layout(showlegend=False)
         fig.write_image(nombre_graf+".jpg")
         fig.write_html(nombre_graf+".html")
-        #fig.show()
     
     def lotka(self, trabajos:list, autores:list):
 
@@ -401,7 +381,6 @@ class graficos():
         fig.write_image(nombre_graf+".jpg")
         fig.write_html(nombre_graf+".html")
 
-
     def pie(self, valores:list, leyenda:list, nombre_graf:str):
         # This dataframe has 244 lines, but 4 distinct values for `day`
         df=pd.DataFrame(dict(leyenda=leyenda, valores=valores))
@@ -411,8 +390,8 @@ class graficos():
 
     def mapa_paises(self, df:pd.DataFrame):
         fig = px.choropleth(df, locations="Codigo",
-                            color="Cantidad_articulos", # lifeExp is a column of gapminder
-                            hover_name="Nombre_pais", # column to add to hover information
+                            color="Cantidad_articulos", 
+                            hover_name="Nombre_pais", 
                             color_continuous_scale=px.colors.sequential.Plasma)
         fig.write_image("mapa.jpg")
         fig.write_html("mapa.html")
@@ -439,6 +418,13 @@ def guardar_modelo_excel():
     baseDatos.FINANCIAMIENTO.to_excel("FINANCIAMIENTO.xlsx")
     return "Tus archivos se encuentran en: \n" + str(os.getcwd())
 
+def guardar_df(df:pd.DataFrame):
+    archivo = filedialog.asksaveasfilename(title='Guardar tabla...', defaultextension='.xlsx', filetypes=[('XLSX', '*.xlsx')]) #va título, directorio de inicio (raíz) tipos que soporta //  initialdir='/', para inicializar el directorio en el puro inicio
+    if not archivo.endswith('.xlsx'):
+            archivo += '.xlsx'
+    archivo=str(archivo)
+    archivo=archivo.replace('/', '\\')
+    df.to_excel(archivo)
     
 def main():
     autores.autores_mas_productivos(autores)   

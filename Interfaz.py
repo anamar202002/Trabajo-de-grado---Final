@@ -70,10 +70,11 @@ class program (Tk):
 
 
         self.state("zoomed")
+
         
         pestañas_f=Frame(self, bg="cornflower blue")
         pestañas_f.place(relheight=0.1, relwidth=1, relx=0, rely=0.9)
-        self.principal_f=Frame(self)
+        self.principal_f=Frame(self, bg='alice blue')
         self.principal_f.place(relx=0, rely=0, relheight=0.9, relwidth=1)
         
         
@@ -149,7 +150,6 @@ class program (Tk):
         txt.pack(anchor="w", padx=10)
         txt.configure(bg=self.opc_f.cget('bg'), relief="flat")
         txt.configure(state="disabled")
-        #Label(self.opc_f, text=texto.get(), bg="lightblue1").pack(anchor="w", padx=10)
 
 
     
@@ -265,7 +265,16 @@ class program (Tk):
         tkinter.Label(self.graf1,text=f'Digite la cantidad de trabajos para saber cuántos \n autores lo han publicado').place(relx=0, rely=0.72)
         Button(self.graf1, text="Calcular", command=lambda:[tkinter.Label(self.graf1, text=self.autores.calculo_lotka(self.autores, int(trabajos.get()))).place(relx=0, rely=0.88, relheight=0.05, relwidth=0.5)]).place(relx=0.2, rely=0.84, relheight=0.03, relwidth=0.1)
 
-        tkinter.Label(self.graf2, text="SE VA EXPLICAR DE QUÉ TRATA LA LEY DE LOTKA").place(relx=0, rely=0, relheight=0.4, relwidth=1)
+        texto = tkinter.StringVar()
+        texto.set("Esta ley fue creada por Alfred Lotka en 1926, Lotka quería saber cuáles eran los investigadores que más contribuían a la ciencia, así tomo unos datos y mientras revisaba esta información se dio cuenta de que la distribución era desigual, esto porque notó que la mayoría de los artículos están concentrados en una pequeña porción de autores, los cuales son altamente productivos. (Urbizagástegui, 1996)\n\nEsta ley es muy útil para identificar a los autores élite que son aquellos con mayor producción de documentos, sin embargo, para que sea más exacta es necesario que el corpus documental que se está analizando tenga una cohesión disciplinar clara. La identificación de estos investigadores permitirá tener claridad sobre los expertos de la temática que se está analizando, dentro de este proyecto se le proponen al usuario dos aplicaciones prácticas: 1) hacer colaboraciones con los autores élite para aumentar su visibilidad. 2) Si va a escribir un artículo, se le recomienda citar a alguno de estos autores ya que son los más expertos en esta disciplina.\n\n\nUrbizagástegui Alvarado, R. (1999). La ley de Lotka y la literatura de la bibliométria. Investigación Bibliotecológica. 13(27), 125-141. ") 
+        txt = tkinter.Text(self.graf2, height=20)
+        txt.insert(1.0, texto.get())
+        txt.place(relx=0, rely=0, relheight=0.4, relwidth=1)
+        txt.configure(relief="flat")
+        txt.configure(state="disabled")
+
+
+        #tkinter.Label(self.graf2, text="SE VA EXPLICAR DE QUÉ TRATA LA LEY DE LOTKA")
         tkinter.Label(self.graf2, text="AUTORES ÉLITE").place(relx=0, rely=0.41, relheight=0.05, relwidth=0.5)
         tkinter.Label(self.graf2, text="ARTÍCULOS DEL AUTOR: ").place(relx=0.5, rely=0.41, relheight=0.05, relwidth=0.3)
 
@@ -276,7 +285,6 @@ class program (Tk):
         
         self.f_au_art=Frame(self.graf2)
         self.f_au_art.place(relx=0.51, rely=0.5, relheight=0.5, relwidth=0.48)
-        tkinter.Label(self.graf1,text=f'Estos calculos que Lotka propusó serán más exáctos \n cuando se está analizando una temática específica').place(relx=0, rely=0.9)
 
     def click_elite(self, e):
         item = self.tv_elite.selection()
@@ -391,7 +399,15 @@ class program (Tk):
         Label(self.graf1, text=art).place(relheight=0.05, relwidth=0.3, relx=0.55, rely=0.65)
         Label(self.graf1, text="Zona 1").place(relx=0.5, rely=0.55)
 
-        tkinter.Label(self.graf2, text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.").place(relx=0, rely=0, relheight=0.4, relwidth=1)
+        texto = tkinter.StringVar()
+        texto.set("La ley de Bradford busca demostrar que la distribución de artículos en las revistas es altamente desigual, de un lado, la mayoría de los artículos se encuentran concentrado en una pequeña población de revistas (zona 1 o núcleo), y del otro lado, una pequeña población de artículos se encuentra dispersa en una gran cantidad de revistas (zonas 2 y 3). (Urbizagástegui , 1996).\n\nDentro de la zona 1 o zona núcleo, se encontrarán las revistas dedicadas a la temática que se está analizando, dentro del programa se proponen tres usos de la información brindada con respecto a Bradford: 1) permite al usuario conocer aquellas revistas que más publican sobre el tema, por ende, permitirá dar una orientación para saber en cuál de las fuentes es más viable publicar su artículo de investigación. 2) Permite reconocer de qué revistas pueden sacar los artículos de investigación más acordes con su temática. 3) Es útil para realizar análisis bibliométricos sobre la temática que se está revisando.\n\n\nUrbizagástegui Alvarado, R. (1996). Una revisión crítica de la Ley de Bradford. Investigación Bibliotecológica. 10(20).") 
+        txt = tkinter.Text(self.graf2, height=20)
+        txt.insert(1.0, texto.get())
+        txt.place(relx=0, rely=0, relheight=0.4, relwidth=1)
+        txt.configure(relief="flat")
+        txt.configure(state="disabled")
+
+        
         tkinter.Label(self.graf2, text="REVISTAS ZONA: ").place(relx=0, rely=0.41, relheight=0.05, relwidth=0.3)
         tkinter.Label(self.graf2, text="ARTICULOS DE LA REVISTA: ").place(relx=0.5, rely=0.41, relheight=0.05, relwidth=0.2)
 
