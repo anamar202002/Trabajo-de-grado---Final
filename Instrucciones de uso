@@ -1,0 +1,45 @@
+Dentro de este repositorio encontrarán el programa Blimartics. El principal objetivo de este
+proyecto es facilitar la revisión de la literatura a la hora de crear estados del arte. Es
+importante resaltar que este programa se creó como un producto del trabajo de
+grado titulado "PROPUESTA DE UNA HERRAMIENTA TECNOLÓGICA PARA LA
+REVISIÓN SISTEMATIZADA DE LITERATURA PROVENIENTE DE WOS, SCOPUS Y
+SCIELO CI" realizado por: Ana María Solano Pachón.
+
+Es una herramienta tecnológica diseñada para facilitar la labor investigativa,
+particularmente la revisión y análisis de la literatura académica que se encuentra
+incluida en revistas indexadas en la colección principal del Web of Science (Science
+Citation Index Expanded, Social Science Citation Index, Arts & Humanities, Book
+Ctitation Index, Emerging Sources Citation Index, entre otros), en el índice citacional
+Scielo o en la base de datos de citas y resúmenes de ElSevier, Scopus.
+Para utilizar este programa es necesario que el usuario exporte la información
+bibliográfica de un conjunto de documentos previamente identificados en estas bases
+de datos Web of Science, Scielo y Scopus. Una vez importados, el programa creará una
+base de datos con la información unificada de todos los registros de las tres bases,
+para luego hacer uso de estos datos a través de la construcción de indicadores y el
+cálculo de leyes bibliométricas. Los distintos análisis propuestos en la herramienta
+buscan proveer al investigador de una información más clara sobre los documentos
+publicados en la disciplina o temática que está analizando.
+
+
+Para utilizarlo es necesaria la instalación de python 3.10 con las siguientes librerías:
+tkhtmlview==0.1.1.post4
+tkinterweb==3.15.6
+pandas==1.4.3
+SQLAlchemy==1.4.40
+plotly==5.10.0
+matplotlib==3.5.3
+matplotlib-inline==0.1.6
+wordcloud==1.8.2.2
+numpy==1.23.1
+openpyxl==3.0.10
+Pillow==9.2.0
+poppler-utils==0.1.0
+
+Luego de la instalación se ejecutará en el equipo el Script "interfaz.py".
+Cabe resaltar que esta es una versión temporal ya que lo ideal será lograr la descarga del programa en un futuro cercano.
+
+
+Autor: Ana María Solano Pachón
+Contacto: ana_solano@javeriana.edu.co
+
+
